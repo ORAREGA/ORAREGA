@@ -1,0 +1,140 @@
+/*
+Attach correct Cookie Notice URL to button, depending on current website and page
+https://usercentrics.atlassian.net/wiki/spaces/SKB/pages/1812529342/How+can+I+link+to+different+privacy+policies+imprints+with+one+Settings+ID+CMP+Version+2#2.-Case:-Different-links-within-one-language
+2023-01-30, Siemens AG
+*/
+
+window.addEventListener("onUcPrivacyClick", function() {
+  let region;
+  let language;
+  let URL
+
+  // AEM: get language and region from URL
+  const domain = document.domain;
+  if (domain == "www.siemens.com" ||
+  domain == "wwwstage.siemens.com" ||
+  domain == "new.siemens.com" ||
+  domain == "uat.new.siemens.com" ||
+  domain == "press.siemens.com") {
+    let path = document.location.pathname;
+    region = path.slice(1,3);
+    language = path.slice(4,6);
+  }
+  // Others: parse <lang> tag
+  // https://github.com/opentable/accept-language-parser/blob/master/index.js
+  else {
+    var regex = /((([a-zA-Z]+(-[a-zA-Z0-9]+){0,2})|\*)(;q=[0-1](\.[0-9]+)?)?)*/g;
+    function parse(al){
+        var strings = (al || "").match(regex);
+        return strings.map(function(m){
+            if(!m){
+                return;
+            }
+
+            var bits = m.split(';');
+            var ietf = bits[0].split('-');
+            var hasScript = ietf.length === 3;
+
+            return {
+                code: ietf[0],
+                script: hasScript ? ietf[1] : null,
+                region: hasScript ? ietf[2] : ietf[1],
+                quality: bits[1] ? parseFloat(bits[1].split('=')[1]) : 1.0
+            };
+        }).filter(function(r){
+                return r;
+            }).sort(function(a, b){
+                return b.quality - a.quality;
+            });
+    }
+    const parsedTag = parse(
+      document.documentElement.lang
+    );
+    region = parsedTag[0].region;
+    language = parsedTag[0].code;
+  }
+
+  // Standardize
+  if (typeof region === "string") {
+    region = region.toLowerCase();
+  }
+  if (typeof language === "string") {
+    language = language.toLowerCase();
+  }
+
+  // Compare language and region with list
+  function cookieNoticeUrlSelector(language, region) {
+
+    // Multi-langauge countries, secondary languages
+    if (region === "be" && language === "en") {URL = "https://www.siemens.com/be/en/general/cookie-notice.html";}
+    else if (region === "be" && language === "fr") {URL = "https://www.siemens.com/be/fr/general/cookie-notice.html";}
+    else if (region === "ca" && language === "fr") {URL = "https://www.siemens.com/ca/fr/general/politique-de-cookies.html";}
+    else if (region === "ch" && language === "fr") {URL = "https://www.siemens.com/ch/fr/general/cookie-notice.html";}
+    else if (region === "cn" && language === "en") {URL = "https://www.siemens.com/cn/en/general/cookie-notice.html";}
+    else if (region === "gr" && language === "en") {URL = "https://www.siemens.com/gr/en/general/cookie-notice.html";}
+    else if (region === "kr" && language === "en") {URL = "https://www.siemens.com/kr/en/general/cookie-notice.html";}
+    else if (region === "lu" && language === "fr") {URL = "https://www.siemens.com/lu/fr/general/cookie-notice.html";}
+
+    // 1:1 country-language relationship
+    else if (region === "ba" || language === "bs" || region ==="me" || language === "me") {URL = "https://www.siemens.com/at/en/general/legal/cookie-notice.html";}
+    else if (region === "bg" || language === "bg") {URL = "https://www.siemens.com/bg/bg/general/cookie-notice.html";}
+    else if (region === "cz" || language === "cs") {URL = "https://www.siemens.com/cz/cs/general/pravidla-cookies.html";}
+    else if (region === "dk" || language === "da") {URL = "https://www.siemens.com/dk/da/general/legal.html";}
+    else if (region === "fi" || language === "fi") {URL = "https://www.siemens.com/fi/fi/general/cookie-notice.html";}
+    else if (region === "gr" || language === "el") {URL = "https://www.siemens.com/gr/el/general/cookie-notice.html";}
+    else if (region === "hr" || language === "hr") {URL = "https://www.siemens.com/hr/hr/general/legal.html#item1-161731714";}
+    else if (region === "hu" || language === "hu") {URL = "https://www.siemens.com/hu/hu/general/cookie-notice.html";}
+    else if (region === "it" || language === "it") {URL = "https://www.siemens.com/it/it/general/cookie-notice.html";}
+    else if (region === "jp" || language === "ja") {URL = "https://www.siemens.com/jp/ja/general/cookie-notice.html";}
+    else if (region === "kr" || language === "ko") {URL = "https://www.siemens.com/kr/ko/general/cookie-notice.html";}
+    else if (region === "no" || language === "no") {URL = "https://www.siemens.com/no/no/general/legal.html#Cookies";}
+    else if (region === "pl" || language === "pl") {URL = "https://www.siemens.com/pl/pl/general/cookie-notice.html";}
+    else if (region === "si" || language === "sl") {URL = "https://www.siemens.com/si/sl/general/obvestilo-o-uporabi-piskotkov.html";}
+    else if (region === "sk" || language === "sk") {URL = "https://www.siemens.com/sk/sk/general/pravidla-cookies.html";}
+    else if (region === "th" || language === "th") {URL = "https://www.siemens.com/th/th/general/cookie-notice.html";}
+    else if (region === "tr" || language === "tr") {URL = "https://www.siemens.com/tr/tr/genel/cerez-bildirimi.html";}
+    else if (region === "ua" || language === "uk") {URL = "https://www.siemens.com/ua/uk/general/politika-faylov-cookie.html";}
+    else if (region === "vn" || language === "vi") {URL = "https://www.siemens.com/vn/vi/general/cookie-notice.html";}
+
+    // Just country tag available, or single-language country, or main-lang of multi-language country
+    else if (region === "at") {URL = "https://www.siemens.com/at/de/general/cookie-richtlinien.html";}
+    else if (region === "au") {URL = "https://www.siemens.com/au/en/general/cookie-notice.html";}
+    else if (region === "az" || region === "ge" || region === "xk") {URL = "https://www.siemens.com/at/en/general/legal/cookie-notice.html";}
+    else if (region === "be") {URL = "https://www.siemens.com/be/nl/general/cookie-notice.html";}
+    else if (region === "br") {URL = "https://www.siemens.com/br/pt/geral/politica-de-cookies.html";}
+    else if (region === "ca") {URL = "https://www.siemens.com/ca/en/general/cookie-notice.html";}
+    else if (region === "ch") {URL = "https://www.siemens.com/ch/de/general/cookie-richtlinien.html";}
+    else if (region === "cl") {URL = "https://www.siemens.com/cl/es/general/cookie-notice.html";}
+    else if (region === "cn") {URL = "https://www.siemens.com/cn/zh/general/cookie-notice.html";}
+    else if (region === "de") {URL = "https://www.siemens.com/de/de/general/cookie-richtlinien.html";}
+    else if (region === "es") {URL = "https://www.siemens.com/es/es/informacion-corporativa/politica-privacidad-cookies.html";}
+    else if (region === "fr") {URL = "https://www.siemens.com/fr/fr/general/politique-de-cookies.html";}
+    else if (region === "hk") {URL = "https://www.siemens.com/hk/en/general/cookie-notice.html";}
+    else if (region === "id") {URL = "https://www.siemens.com/id/en/general/cookie-notice.html";}
+    else if (region === "ie") {URL = "https://www.siemens.com/ie/en/general/cookie-notice.html";}
+    else if (region === "il") {URL = "https://www.siemens.com/il/en/general/cookie-notice.html";}
+    else if (region === "in") {URL = "https://www.siemens.com/in/en/general/legal/cookie-notice.html";}
+    else if (region === "kz") {URL = "https://www.siemens.com/kz/ru/general/cookie-notice.html";}
+    else if (region === "lu") {URL = "https://www.siemens.com/lu/de/general/cookie-richtlinien.html";}
+    else if (region === "ma") {URL = "https://www.siemens.com/ma/fr/general/legal.html";}
+    else if (region === "mk") {URL = "https://www.siemens.com/gr/en/general/cookie-notice.html";}
+    else if (region === "mx") {URL = "https://www.siemens.com/mx/es/general/cookie-notice.html";}
+    else if (region === "my") {URL = "https://www.siemens.com/my/en/general/cookie-notice.html";}
+    else if (region === "nl") {URL = "https://www.siemens.com/nl/nl/general/cookie-notice.html";}
+    else if (region === "pe") {URL = "https://www.siemens.com/pe/es/general/aviso-sobre-el-uso-de-cookies.html";}
+    else if (region === "pt") {URL = "https://www.siemens.com/pt/pt/general/cookie-policy.html";}
+    else if (region === "sg") {URL = "https://www.siemens.com/sg/en/general/cookie-notice.html";}
+    else if (region === "tn") {URL = "https://www.siemens.com/tn/fr/general/cookie-notice.html";}
+    else if (region === "uk") {URL = "https://www.siemens.com/uk/en/general/cookie-notice.html";}
+    else if (region === "us") {URL = "https://www.siemens.com/us/en/general/legal/cookie-notice.html";}
+    else if (region === "za") {URL = "https://www.siemens.com/za/en/general/cookie-notice.html";}
+
+    // Fallback
+    else {URL = "https://www.siemens.com/global/en/general/cookie-notice.html";}
+
+    return URL;
+  }
+
+  // Execute URL
+  window.location.assign(cookieNoticeUrlSelector(language, region));
+});
